@@ -1,0 +1,26 @@
+{
+  "name": "documents-css-handoff",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Прототип «Документы из облака» (VK Cloud) на React + VKUI — визуально-анимационный слой для передачи в разработку",
+  "workspaces": [
+    "packages/*",
+    "apps/documents-css"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w apps/documents-css",
+    "build": "npm run build -w apps/documents-css",
+    "typecheck": "npm run typecheck -w apps/documents-css"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

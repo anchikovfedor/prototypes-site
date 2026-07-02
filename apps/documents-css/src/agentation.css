@@ -1,0 +1,16 @@
+/* Открывать dev-тулбар agentation в левом верхнем углу (по умолчанию — правый нижний).
+   Двойной класс перебивает библиотечный `.toolbar` по специфичности; без !important,
+   чтобы инлайн-позиция при перетаскивании по-прежнему работала. */
+.agentation-tl.agentation-tl {
+  top: 1.25rem;
+  left: 1.25rem;
+  right: auto;
+  bottom: auto;
+}
+
+/* Контейнер тулбара по умолчанию прижат вправо (margin-left:auto) — для левого
+   угла выравниваем его к левому краю, чтобы пузырёк стоял в самом углу. */
+.agentation-tl.agentation-tl > div:first-child {
+  margin-left: 0;
+  margin-right: auto;
+}

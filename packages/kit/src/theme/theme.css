@@ -1,0 +1,59 @@
+/* Базовые стили VKUI 8 */
+@import '@vkontakte/vkui/dist/vkui.css';
+
+/*
+ * Кастомная дизайн-система поверх VKUI (placeholder).
+ * Класс вешается на контейнер AppRoot и переопределяет отдельные токены VKUI —
+ * остальные токены наследуются из дефолтного набора VKUI.
+ *
+ * Полноценный путь (вся палитра/типографика из Figma) описан в
+ * memory-bank/designContext.md через @vkontakte/vkui-tokens.
+ */
+.proto-brand {
+  --vkui--color_background_accent: #1f6feb;
+  --vkui--color_background_accent_themed: #1f6feb;
+  --vkui--color_background_accent_tint: #1f6feb;
+  --vkui--color_text_accent: #1f6feb;
+  --vkui--color_text_accent_themed: #1f6feb;
+}
+
+/* Рамка телефона для таргета mobile-app */
+.proto-phone-frame {
+  --proto-phone-width: 390px;
+  --proto-phone-height: 844px;
+  --proto-phone-radius: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 24px;
+  box-sizing: border-box;
+  background: #e9ebed;
+}
+
+.proto-phone-frame__device {
+  position: relative;
+  width: var(--proto-phone-width);
+  height: var(--proto-phone-height);
+  max-height: calc(100dvh - 48px);
+  border-radius: var(--proto-phone-radius);
+  background: #000;
+  padding: 12px;
+  box-sizing: border-box;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.proto-phone-frame__screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--proto-phone-radius) - 12px);
+  background: var(--vkui--color_background, #fff);
+}
+
+/* Контейнер десктоп-веба (полная ширина) */
+.proto-desktop {
+  min-height: 100dvh;
+}

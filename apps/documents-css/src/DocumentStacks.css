@@ -1,0 +1,249 @@
+/* === Документы из облака === Морф на чистых CSS-transition поверх абсолютных персистентных
+   элементов (карточки/фото не пересоздаются). Easing/тайминг из Figma. */
+.docs-bg,
+.title-swap {
+  --dur: 0.5s;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.docs-bg {
+  min-height: 100%;
+  /* фон страницы — значение макета (#f6f7f8); живой VKUI-токен резолвится в #edeef0 */
+  background: var(--vkui--color_background, #f6f7f8);
+  /* edge-swipe: вертикальный скролл документа — браузеру, горизонталь у края — жесту.
+     user-select off, чтобы drag мышью на десктопе не выделял текст. */
+  touch-action: pan-y;
+  user-select: none;
+}
+/* Единый фон на всех слоях, иначе при pull-to-refresh проступают белый/серый слои VKUI. */
+.vkuiPanelHeader__in,
+.vkuiPanel__in {
+  background: var(--vkui--color_background, #f6f7f8) !important;
+}
+html,
+body {
+  background: var(--vkui--color_background, #f6f7f8) !important;
+}
+/* сглаживание как в Figma (grayscale): без него VK Sans на macOS рендерится жирнее */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* кнопка «назад»: цвет иконки из макета + квадратный контейнер */
+.vkuiPanelHeaderButton__host,
+.vkuiPanelHeaderButton {
+  color: var(--vkui--color_icon_primary, #2c2d2e) !important;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  box-sizing: border-box;
+}
+.vkuiPanelHeaderButton__host svg,
+.vkuiPanelHeaderButton svg {
+  color: var(--vkui--color_icon_primary, #2c2d2e) !important;
+}
+
+/* Сцена: фикс-ширина (из JS), центр, высота анимируется. Координаты детей — абсолютные px. */
+.docs-stage {
+  position: relative;
+  margin: 16px auto 32px;
+  transition: height var(--dur) var(--ease);
+}
+
+/* Карточка-стопка: абсолютная, растёт из ячейки в полную ширину. */
+.doc-card {
+  position: absolute;
+  box-sizing: border-box;
+  /* Свой stacking context: z-index ячеек (до count) не протекают в корень и не лезут
+     поверх фикс-хедера (z-index 10) при скролле. */
+  isolation: isolate;
+  transition:
+    left var(--dur) var(--ease),
+    top var(--dur) var(--ease),
+    width var(--dur) var(--ease),
+    height var(--dur) var(--ease),
+    opacity var(--dur) var(--ease),
+    filter var(--dur) var(--ease);
+}
+.doc-card.is-open {
+  z-index: 3;
+}
+/* Прочие карточки при развороте — в полную прозрачность + blur. */
+.doc-card.is-dimmed {
+  opacity: 0;
+  filter: blur(24px);
+  pointer-events: none;
+}
+.doc-card:not(.is-open):not(.is-dimmed) {
+  cursor: pointer;
+}
+.doc-card__photos {
+  position: absolute;
+  inset: 0;
+}
+
+/* Ячейка документа — серая заливка в рамке с тенью. На развороте рамка/тень тают, радиус растёт. */
+.doc-photo {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--vkui--color_background_secondary, #f0f2f5);
+  border: 1.5px solid var(--vkui--color_stroke_contrast, #fff);
+  box-shadow: 0 1px 2px rgba(0, 16, 61, 0.08), 0 2px 6px rgba(0, 16, 61, 0.08);
+  transform-origin: center center;
+  transition:
+    left var(--dur) var(--ease),
+    top var(--dur) var(--ease),
+    width var(--dur) var(--ease),
+    height var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease),
+    border-width var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    border-radius var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.doc-card.is-open .doc-photo {
+  border-width: 1px;
+  border-color: var(--vkui--color_image_border_alpha, rgba(0, 16, 61, 0.08));
+  border-radius: 24px;
+  box-shadow: 0 1px 2px rgba(0, 16, 61, 0), 0 2px 6px rgba(0, 16, 61, 0);
+}
+/* Плитка «Загрузить ещё» внутри развёрнутого документа. */
+.doc-photo--add {
+  border: none;
+  box-shadow: none;
+  background: var(--vkui--color_background_accent_tint_themed_alpha, rgba(0, 119, 255, 0.06));
+}
+
+/* Заголовок карточки (имя + счётчик), 1 строка, по центру (как в макете). top — inline (под зоной
+   превью), чтобы при росте карточки заголовок оставался на месте. При развороте — прозрачность + blur. */
+.doc-card__title {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  gap: 2px;
+  transition: opacity var(--dur) var(--ease), filter var(--dur) var(--ease);
+}
+.doc-card.is-open .doc-card__title {
+  opacity: 0;
+  filter: blur(24px);
+}
+.doc-card__name {
+  font-family: 'VK Sans Display', var(--vkui--font_family_base, sans-serif);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--vkui--color_text_primary, #2c2d2e);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.doc-card__count {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--vkui--color_text_secondary, #87898f);
+}
+
+/* Отдельная карточка «добавить документ». */
+.doc-card--adddoc {
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--vkui--color_background_accent_tint_themed_alpha, rgba(0, 119, 255, 0.06));
+}
+
+/* Плитка «Загрузить ещё» (контент). */
+.add-tile {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 16px;
+  box-sizing: border-box;
+  color: var(--vkui--color_text_accent, #0070f0);
+}
+.add-tile__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+.add-tile__title {
+  font-family: 'VK Sans Display', var(--vkui--font_family_base, sans-serif);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 20px;
+  white-space: nowrap;
+}
+.add-tile__hint {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--vkui--color_text_link_visited, #528fdf);
+}
+.add-tile__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 25px;
+  flex: none;
+  background: var(--vkui--color_background_contrast, #fff);
+}
+
+/* Заголовок хедера — text-swap (transitions.dev): 150ms, translateY 4px, blur 2px, ease-in-out. */
+.title-swap {
+  display: inline-block;
+  white-space: nowrap;
+  font-family: 'VK Sans Display', var(--vkui--font_family_base, sans-serif);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+  color: var(--vkui--color_text_primary, #2c2d2e);
+  transform: translateY(0);
+  filter: blur(0);
+  opacity: 1;
+  transition: transform 150ms ease-in-out, filter 150ms ease-in-out, opacity 150ms ease-in-out;
+  will-change: transform, filter, opacity;
+}
+.title-swap.is-exit {
+  transform: translateY(-4px);
+  filter: blur(2px);
+  opacity: 0;
+}
+.title-swap.is-enter-start {
+  transform: translateY(4px);
+  filter: blur(2px);
+  opacity: 0;
+  transition: none;
+}
+
+/* Тумблер Motion off — полностью мгновенно (дев-переключатель). */
+.docs-bg.no-motion .docs-stage,
+.docs-bg.no-motion .docs-stage * {
+  transition: none !important;
+}
+/* prefers-reduced-motion — «мягко» (a11y): убираем движение/блюр, оставляем короткий
+   opacity-кроссфейд (reduced-motion = меньше и мягче, не ноль). */
+@media (prefers-reduced-motion: reduce) {
+  .docs-stage,
+  .docs-stage *,
+  .title-swap {
+    transition: opacity 0.5s ease !important;
+    transition-delay: 0s !important;
+  }
+  .doc-card.is-dimmed,
+  .doc-card.is-open .doc-card__title,
+  .title-swap.is-exit,
+  .title-swap.is-enter-start {
+    filter: none;
+    transform: none;
+  }
+}

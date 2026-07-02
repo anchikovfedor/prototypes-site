@@ -1,0 +1,15 @@
+/* VK Sans Display — акцентный шрифт заголовков (файлы в public/fonts) */
+@font-face {
+  font-family: 'VK Sans Display';
+  src: url('/fonts/VKSansDisplay-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'VK Sans Display';
+  src: url('/fonts/VKSansDisplay-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
