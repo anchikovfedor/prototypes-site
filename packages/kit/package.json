@@ -12,6 +12,7 @@
   "dependencies": {
     "@vkontakte/icons": "^3.60.0",
     "@vkontakte/vkui": "^8.3.0",
+    "@vkontakte/vkui-tokens": "^4.83.0",
     "react-router-dom": "^7.18.0"
   },
   "peerDependencies": {

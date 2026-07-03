@@ -12,6 +12,13 @@ const DEFAULT_PLATFORM: Record<Target, PlatformType> = {
   adaptive: 'ios',
 };
 
+// Тема Paradigm для всех платформ; классы — из packages/kit/src/theme/paradigm.css
+// (генерируется scripts/generate-paradigm-theme.mjs из @vkontakte/vkui-tokens).
+const PARADIGM_TOKENS_CLASS_NAMES = {
+  light: 'vkui--paradigmBase--light',
+  dark: 'vkui--paradigmBase--dark',
+};
+
 function prefersReducedMotion(): boolean {
   return (
     typeof window !== 'undefined' &&
@@ -46,7 +53,12 @@ function Inner({ target, children }: { target: Target; children: ReactNode }) {
   const embedded = target === 'mobile-app';
 
   const app = (
-    <ConfigProvider platform={platform} colorScheme={colorScheme} transitionMotionEnabled={motion}>
+    <ConfigProvider
+      platform={platform}
+      colorScheme={colorScheme}
+      tokensClassNames={PARADIGM_TOKENS_CLASS_NAMES}
+      transitionMotionEnabled={motion}
+    >
       <AdaptivityProvider {...adaptivity}>
         <AppRoot
           className="proto-brand"

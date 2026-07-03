@@ -8,8 +8,10 @@
 
 .docs-bg {
   min-height: 100%;
-  /* фон страницы — значение макета (#f6f7f8); живой VKUI-токен резолвится в #edeef0 */
-  background: var(--vkui--color_background, #f6f7f8);
+  /* фон страницы — в Figma это токен Background/BackgroundPortal (#f6f7f8); в теме
+     paradigmBase его нет (есть только в cloud: --vkui--cloud_color_background_portal),
+     поэтому значение захардкожено */
+  background: #f6f7f8;
   /* edge-swipe: вертикальный скролл документа — браузеру, горизонталь у края — жесту.
      user-select off, чтобы drag мышью на десктопе не выделял текст. */
   touch-action: pan-y;
@@ -18,11 +20,11 @@
 /* Единый фон на всех слоях, иначе при pull-to-refresh проступают белый/серый слои VKUI. */
 .vkuiPanelHeader__in,
 .vkuiPanel__in {
-  background: var(--vkui--color_background, #f6f7f8) !important;
+  background: #f6f7f8 !important;
 }
 html,
 body {
-  background: var(--vkui--color_background, #f6f7f8) !important;
+  background: #f6f7f8 !important;
 }
 /* сглаживание как в Figma (grayscale): без него VK Sans на macOS рендерится жирнее */
 body {
