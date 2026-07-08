@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # vite cache
 .vite/
+
+# проприетарные шрифты (VK Sans Display) — не распространяем; локально/в CI из секрета,
+# см. memory-bank/conventions.md §«Шрифты и рендеринг»
+apps/*/public/fonts/*.ttf
+apps/*/src/fonts/*.ttf

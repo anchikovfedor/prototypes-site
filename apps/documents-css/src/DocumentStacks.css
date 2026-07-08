@@ -6,12 +6,21 @@
   --ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* фон страницы — в Figma это токен Background/BackgroundPortal (#f6f7f8); в теме
+   paradigmBase его нет (есть только в cloud: --vkui--cloud_color_background_portal),
+   поэтому значения захардкожены парой light/dark. Переменная объявлена на :root,
+   т.к. класс темы VKUI вешает на div внутри AppRoot — html/body его не видят,
+   dark ловим через :has(). */
+:root {
+  --docs-page-bg: #f6f7f8;
+}
+:root:has(.vkui--paradigmBase--dark) {
+  --docs-page-bg: #19191a;
+}
+
 .docs-bg {
   min-height: 100%;
-  /* фон страницы — в Figma это токен Background/BackgroundPortal (#f6f7f8); в теме
-     paradigmBase его нет (есть только в cloud: --vkui--cloud_color_background_portal),
-     поэтому значение захардкожено */
-  background: #f6f7f8;
+  background: var(--docs-page-bg);
   /* edge-swipe: вертикальный скролл документа — браузеру, горизонталь у края — жесту.
      user-select off, чтобы drag мышью на десктопе не выделял текст. */
   touch-action: pan-y;
@@ -20,11 +29,11 @@
 /* Единый фон на всех слоях, иначе при pull-to-refresh проступают белый/серый слои VKUI. */
 .vkuiPanelHeader__in,
 .vkuiPanel__in {
-  background: #f6f7f8 !important;
+  background: var(--docs-page-bg) !important;
 }
 html,
 body {
-  background: #f6f7f8 !important;
+  background: var(--docs-page-bg) !important;
 }
 /* сглаживание как в Figma (grayscale): без него VK Sans на macOS рендерится жирнее */
 body {
@@ -93,7 +102,9 @@ body {
   overflow: hidden;
   background: var(--vkui--color_background_secondary, #f0f2f5);
   border: 1.5px solid var(--vkui--color_stroke_contrast, #fff);
-  box-shadow: 0 1px 2px rgba(0, 16, 61, 0.08), 0 2px 6px rgba(0, 16, 61, 0.08);
+  box-shadow:
+    0 1px 2px rgba(0, 16, 61, 0.08),
+    0 2px 6px rgba(0, 16, 61, 0.08);
   transform-origin: center center;
   transition:
     left var(--dur) var(--ease),
@@ -111,7 +122,9 @@ body {
   border-width: 1px;
   border-color: var(--vkui--color_image_border_alpha, rgba(0, 16, 61, 0.08));
   border-radius: 24px;
-  box-shadow: 0 1px 2px rgba(0, 16, 61, 0), 0 2px 6px rgba(0, 16, 61, 0);
+  box-shadow:
+    0 1px 2px rgba(0, 16, 61, 0),
+    0 2px 6px rgba(0, 16, 61, 0);
 }
 /* Плитка «Загрузить ещё» внутри развёрнутого документа. */
 .doc-photo--add {
@@ -130,7 +143,9 @@ body {
   flex-direction: column;
   text-align: center;
   gap: 2px;
-  transition: opacity var(--dur) var(--ease), filter var(--dur) var(--ease);
+  transition:
+    opacity var(--dur) var(--ease),
+    filter var(--dur) var(--ease);
 }
 .doc-card.is-open .doc-card__title {
   opacity: 0;
@@ -212,7 +227,10 @@ body {
   transform: translateY(0);
   filter: blur(0);
   opacity: 1;
-  transition: transform 150ms ease-in-out, filter 150ms ease-in-out, opacity 150ms ease-in-out;
+  transition:
+    transform 150ms ease-in-out,
+    filter 150ms ease-in-out,
+    opacity 150ms ease-in-out;
   will-change: transform, filter, opacity;
 }
 .title-swap.is-exit {

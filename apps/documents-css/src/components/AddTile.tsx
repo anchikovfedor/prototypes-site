@@ -8,7 +8,12 @@ export function AddTile() {
       </div>
       <span className="add-tile__btn" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 4.5v11M4.5 10h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path
+            d="M10 4.5v11M4.5 10h11"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
         </svg>
       </span>
     </div>

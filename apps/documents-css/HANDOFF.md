@@ -8,8 +8,18 @@
 меняется на имя документа. Вся анимация — **чистые CSS-`transition`** поверх абсолютно
 позиционированных **персистентных** элементов (не пересоздаются при морфе).
 Таргет: **`adaptive`** (платформа vkcom, web-iframe в проде), контент до **720px**, без рамки
-телефона. Источник: Figma `<figma-file-key>` (<internal-ticket>); свёрнутое — `2813:69546`,
-motion — `2797:53377`.
+телефона.
+
+## Источник / вход
+
+Figma-файл `<figma-file-key>` (задача <internal-ticket>), узлы:
+
+- свёрнутое состояние (сетка) — **`2842:67342`** (актуальный; веер изначально сверялся по
+  прежнему `2813:69546`);
+- развёрнутое состояние (страница документа) — **`2842:67568`**;
+- анимация (Figma Motion) — **`2797:53377`**, таймлайн тянуть `get_motion_context`
+  **`recursive: true`** (корневой Smart-Animate символ отдаёт пустой таймлайн, значения — на
+  дочерних узлах `2781:69xxx` в `codeSnippets.motionDev`).
 
 ## Архитектура анимации (важно)
 
@@ -51,7 +61,9 @@ motion — `2797:53377`.
   (нужно для absolute-морфа), согласовано с пользователем.
 - Веер превью — пиксель-перфект (rotate + общий `skewX(-1.17°)`, origin center).
 - Фон `#f6f7f8` (значение макета) на `html`/`body`/`.vkuiPanel__in`/`.vkuiPanelHeader__in` через `!important`.
-- Шрифт заголовков — **VK Sans Display** (бандлится: `public/fonts` + `src/fonts.css`) + `font-smoothing: antialiased`.
+- Шрифт заголовков — **VK Sans Display** (`public/fonts` + `src/fonts.css`) + `font-smoothing: antialiased`.
+  Файлы шрифта **не в git** (проприетарный): положи `.ttf` локально в `public/fonts/`, иначе —
+  системный fallback-стек.
 - Кнопка «назад» — `Icon24ChevronLeftOutline` в `PanelHeaderButton` (тёмная `#2c2d2e`, 48px).
 
 ## Фото

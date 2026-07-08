@@ -1,0 +1,9 @@
+# сборка и лок-файл
+dist/
+package-lock.json
+
+# markdown — ручное форматирование (memory-bank, HANDOFF, скиллы)
+*.md
+
+# генерируется scripts/generate-paradigm-theme.mjs — не переформатировать вручную
+packages/kit/src/theme/paradigm.css

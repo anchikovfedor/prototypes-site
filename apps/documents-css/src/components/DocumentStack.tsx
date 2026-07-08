@@ -44,7 +44,9 @@ export function DocumentStack({ item, gridIndex, stageW, open, dimmed, onOpen }:
   const cls = ['doc-card', open && 'is-open', dimmed && 'is-dimmed'].filter(Boolean).join(' ');
   // Плитка «Загрузить ещё» — ячейка count: развёрнутая = сетка, свёрнутая = позиция передней карточки (opacity 0).
   // z: 0 — всегда под контентными ячейками (z 1..count), чтобы при закрытии не проступала полупрозрачной поверх них.
-  const addPos = open ? expandedPhoto(item.count, item.count, stageW) : { ...collapsedPhoto(0, item.count, stageW), opacity: 0, z: 0 };
+  const addPos = open
+    ? expandedPhoto(item.count, item.count, stageW)
+    : { ...collapsedPhoto(0, item.count, stageW), opacity: 0, z: 0 };
 
   // Стаггер «выезда»: при открытии непарные фото (индекс >= shared) стартуют с задержкой (30 мс/шаг,
   // кап 150 мс). Шара (первые ≤3) и закрытие — без задержки.
@@ -60,12 +62,17 @@ export function DocumentStack({ item, gridIndex, stageW, open, dimmed, onOpen }:
             key={i}
             className="doc-photo"
             style={{
-              ...photoStyle(open ? expandedPhoto(i, item.count, stageW) : collapsedPhoto(i, item.count, stageW)),
+              ...photoStyle(
+                open ? expandedPhoto(i, item.count, stageW) : collapsedPhoto(i, item.count, stageW),
+              ),
               transitionDelay: delayFor(i),
             }}
           />
         ))}
-        <div className="doc-photo doc-photo--add" style={{ ...photoStyle(addPos), transitionDelay: delayFor(item.count) }}>
+        <div
+          className="doc-photo doc-photo--add"
+          style={{ ...photoStyle(addPos), transitionDelay: delayFor(item.count) }}
+        >
           <AddTile />
         </div>
       </div>

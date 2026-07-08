@@ -3,7 +3,6 @@ import { AdaptivityProvider, AppRoot, ConfigProvider, ViewWidth } from '@vkontak
 import type { PlatformType } from '@vkontakte/vkui';
 import { PrototypeSettingsProvider, usePrototypeSettings } from '../settings/PrototypeSettings';
 import { DevBar } from '../devtools/DevBar';
-import { PhoneFrame } from '../shells/PhoneFrame';
 import type { ColorScheme, Target } from '../types';
 
 const DEFAULT_PLATFORM: Record<Target, PlatformType> = {
@@ -71,10 +70,16 @@ function Inner({ target, children }: { target: Target; children: ReactNode }) {
     </ConfigProvider>
   );
 
-  return embedded ? <PhoneFrame>{app}</PhoneFrame> : <div className="proto-desktop">{app}</div>;
+  // Рамку устройства не рисуем (конвенция, memory-bank/conventions.md):
+  // mobile-app занимает весь вьюпорт, скролл — внутри AppRoot.
+  return embedded ? (
+    <div className="proto-mobile">{app}</div>
+  ) : (
+    <div className="proto-desktop">{app}</div>
+  );
 }
 
-/** Корень прототипа: провайдеры VKUI + рамка под таргет + dev-переключатель. */
+/** Корень прототипа: провайдеры VKUI + контейнер под таргет + dev-переключатель. */
 export function PrototypeRoot({
   target,
   platform,

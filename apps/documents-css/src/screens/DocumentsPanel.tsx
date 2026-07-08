@@ -77,7 +77,9 @@ export function DocumentsPanel({ nav }: { nav: string }) {
     width: cardWidth(stageW),
     height: cardHeight(stageW),
   };
-  const addDocCls = ['doc-card', 'doc-card--adddoc', openId !== null && 'is-dimmed'].filter(Boolean).join(' ');
+  const addDocCls = ['doc-card', 'doc-card--adddoc', openId !== null && 'is-dimmed']
+    .filter(Boolean)
+    .join(' ');
 
   const stage = (
     <div className="docs-stage" style={{ width: stageW, height: stageHeight }}>
