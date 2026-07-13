@@ -1,0 +1,9 @@
+{
+  "name": "Prototype — Template",
+  "short_name": "Prototype",
+  "display": "standalone",
+  "start_url": ".",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": []
+}
