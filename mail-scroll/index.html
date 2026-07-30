@@ -9,10 +9,15 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- black-translucent, а не default: только так вебвью в standalone занимает и зону
+         статус-бара (env(safe-area-inset-top) начинает отдавать её высоту), и под статус-бар
+         уходит синий фон страницы. Заодно текст статус-бара становится белым. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- тулбар Safari и системный хром Android — в синий верх градиента (Bg_Light) -->
+    <meta name="theme-color" content="#1c85fe" />
     <title>Prototype — mail-scroll</title>
-    <script type="module" crossorigin src="/prototypes-site/mail-scroll/assets/index-JJ_-Ssbr.js"></script>
-    <link rel="stylesheet" crossorigin href="/prototypes-site/mail-scroll/assets/index-XAf4EeZd.css">
+    <script type="module" crossorigin src="/prototypes-site/mail-scroll/assets/index-DolBuo1p.js"></script>
+    <link rel="stylesheet" crossorigin href="/prototypes-site/mail-scroll/assets/index-zNVOKiMq.css">
   </head>
   <body>
     <div id="root"></div>
