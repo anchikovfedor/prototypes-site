@@ -114,16 +114,44 @@
         pointer-events: none;
       }
       .rotated {
-        transform: translate(-50%, -50%) rotate(90deg) scale(3);
+        /* switch ~51×31 CSS px: поворот ставит его ось перетаскивания вертикально,
+           scale(7) растягивает эту ось на всю высоту площадки */
+        transform: translate(-50%, -50%) rotate(90deg) scale(7);
       }
       .plain-under {
-        transform: translate(-50%, -50%) scale(3);
+        transform: translate(-50%, -50%) scale(7);
       }
       @media (pointer: coarse) {
         .rotated,
         .plain-under {
           pointer-events: auto;
         }
+      }
+      /* Тот же повёрнутый контрол, но видимый — чтобы глазами увидеть, реагирует ли он */
+      .shown-rot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: 0;
+        transform: translate(-50%, -50%) rotate(90deg) scale(4);
+        touch-action: manipulation;
+      }
+      .swipe.tall {
+        height: 240px;
+      }
+      .badge {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: #99a2ad;
+        color: #fff;
+        font-size: 13px;
+        pointer-events: none;
+      }
+      .badge[data-on='1'] {
+        background: #4bb34b;
       }
       #log {
         margin-top: 16px;
@@ -207,18 +235,30 @@
     </div>
 
     <div class="case">
-      <b>10. Невидимый switch, повёрнутый на 90° — веду пальцем вертикально</b>
-      <div class="swipe rot">
-        Свайп вверх/вниз здесь
-        <input class="sw rotated" type="checkbox" tabindex="-1" aria-hidden="true" />
+      <b>10. Видимый switch, повёрнутый на 90° — тяну пальцем вверх/вниз по нему</b>
+      <div class="swipe rot tall">
+        <span class="badge" data-badge="visible-rot">OFF</span>
+        <input class="sw shown-rot" type="checkbox" id="visible-rot" />
       </div>
-      <label>если щёлкает — хаптик в жесте достижим, и его можно навесить на свайп шторки</label>
+      <label>
+        главный пункт: видно, переключается ли контрол от вертикального движения. Тяните медленно,
+        от края до края
+      </label>
     </div>
 
     <div class="case">
-      <b>11. Невидимый switch без поворота — веду пальцем вертикально (контроль)</b>
-      <div class="swipe rot">
-        Свайп вверх/вниз здесь
+      <b>11. Невидимый switch, повёрнутый на 90° — большая площадка, как в бою</b>
+      <div class="swipe rot tall">
+        <span class="badge" data-badge="rotated">OFF</span>
+        <input class="sw rotated" type="checkbox" tabindex="-1" aria-hidden="true" />
+      </div>
+      <label>то же самое, но контрол невидим и растянут на всю площадку</label>
+    </div>
+
+    <div class="case">
+      <b>12. Невидимый switch без поворота — веду пальцем вертикально (контроль)</b>
+      <div class="swipe rot tall">
+        <span class="badge" data-badge="plain-under">OFF</span>
         <input class="sw plain-under" type="checkbox" tabindex="-1" aria-hidden="true" />
       </div>
       <label>ожидаемо тишина: для контрола это не его ось</label>
@@ -310,11 +350,20 @@
       document.getElementById('dragme').addEventListener('change', (e) => {
         log('9: перетаскивание видимого switch → ' + e.target.checked);
       });
-      document.querySelector('.rotated').addEventListener('change', (e) => {
-        log('10: повёрнутый switch переключился → ' + e.target.checked);
-      });
-      document.querySelector('.plain-under').addEventListener('change', (e) => {
-        log('11: неповёрнутый switch переключился → ' + e.target.checked);
+
+      // Пункты 10-12: бейдж рядом с площадкой показывает, переключился ли контрол
+      [
+        ['visible-rot', '10 видимый повёрнутый'],
+        ['rotated', '11 невидимый повёрнутый'],
+        ['plain-under', '12 без поворота'],
+      ].forEach(([key, title]) => {
+        const input = document.querySelector('#' + key) || document.querySelector('.' + key);
+        const badge = document.querySelector('[data-badge="' + key + '"]');
+        input.addEventListener('change', () => {
+          badge.textContent = input.checked ? 'ON' : 'OFF';
+          badge.dataset.on = input.checked ? '1' : '0';
+          log(title + ' → ' + input.checked);
+        });
       });
     </script>
   </body>
