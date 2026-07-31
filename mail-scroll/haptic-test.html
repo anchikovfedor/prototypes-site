@@ -96,6 +96,35 @@
         font-size: 14px;
         touch-action: none;
       }
+      .swipe.rot {
+        position: relative;
+        overflow: hidden;
+        /* none мог бы отобрать жест у самого контрола — оставляем ему обработку */
+        touch-action: manipulation;
+      }
+      /* Повёрнутый на 90°: ось перетаскивания контрола становится вертикальной,
+         масштаб — чтобы он накрыл площадку целиком */
+      .rotated,
+      .plain-under {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .rotated {
+        transform: translate(-50%, -50%) rotate(90deg) scale(3);
+      }
+      .plain-under {
+        transform: translate(-50%, -50%) scale(3);
+      }
+      @media (pointer: coarse) {
+        .rotated,
+        .plain-under {
+          pointer-events: auto;
+        }
+      }
       #log {
         margin-top: 16px;
         padding: 10px 12px;
@@ -163,6 +192,36 @@
     <div class="case">
       <b>8. navigator.vibrate(10) — контроль</b>
       <button type="button" data-act="vibrate">Тап → vibrate(10)</button>
+    </div>
+
+    <h1 style="margin-top: 28px">Вторая серия: хаптик во время свайпа</h1>
+    <p class="hint">
+      Программные клики отпали, но switch переключается ещё и перетаскиванием. Проверяем, добывается
+      ли из этого хаптик прямо в жесте.
+    </p>
+
+    <div class="case">
+      <b>9. Видимый switch — тяну пальцем вбок, не тапаю</b>
+      <input class="sw" type="checkbox" id="dragme" />
+      <label for="dragme">есть ли хаптик от перетаскивания, а не только от тапа</label>
+    </div>
+
+    <div class="case">
+      <b>10. Невидимый switch, повёрнутый на 90° — веду пальцем вертикально</b>
+      <div class="swipe rot">
+        Свайп вверх/вниз здесь
+        <input class="sw rotated" type="checkbox" tabindex="-1" aria-hidden="true" />
+      </div>
+      <label>если щёлкает — хаптик в жесте достижим, и его можно навесить на свайп шторки</label>
+    </div>
+
+    <div class="case">
+      <b>11. Невидимый switch без поворота — веду пальцем вертикально (контроль)</b>
+      <div class="swipe rot">
+        Свайп вверх/вниз здесь
+        <input class="sw plain-under" type="checkbox" tabindex="-1" aria-hidden="true" />
+      </div>
+      <label>ожидаемо тишина: для контрола это не его ось</label>
     </div>
 
     <div id="log"></div>
@@ -247,6 +306,15 @@
       });
       document.querySelector('.under').addEventListener('change', (e) => {
         log('2: switch под кнопкой → ' + e.target.checked);
+      });
+      document.getElementById('dragme').addEventListener('change', (e) => {
+        log('9: перетаскивание видимого switch → ' + e.target.checked);
+      });
+      document.querySelector('.rotated').addEventListener('change', (e) => {
+        log('10: повёрнутый switch переключился → ' + e.target.checked);
+      });
+      document.querySelector('.plain-under').addEventListener('change', (e) => {
+        log('11: неповёрнутый switch переключился → ' + e.target.checked);
       });
     </script>
   </body>
