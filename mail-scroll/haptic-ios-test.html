@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Хаптик на iOS 26.5 — стенд №2</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font:
+          16px/1.4 -apple-system,
+          system-ui,
+          sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 16px 16px 48px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 28px 0 8px;
+      }
+      p.hint {
+        margin: 0 0 16px;
+        color: #697481;
+        font-size: 14px;
+      }
+      .case {
+        position: relative;
+        margin-bottom: 10px;
+        padding: 12px 14px;
+        border: 1px solid #d7d8d9;
+        border-radius: 12px;
+      }
+      .case b {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+      .case label.note {
+        display: block;
+        margin-top: 8px;
+        color: #697481;
+        font-size: 13px;
+      }
+      button,
+      .tap {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 48px;
+        font: inherit;
+        border: 0;
+        border-radius: 10px;
+        background: #2688eb;
+        color: #fff;
+        touch-action: manipulation;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .mover {
+        width: 40px;
+        height: 12px;
+        border-radius: 6px;
+        background: #2688eb;
+        transition: transform 300ms ease;
+      }
+      .swipe {
+        position: relative;
+        height: 96px;
+        border: 1px dashed #99a2ad;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #697481;
+        font-size: 14px;
+        touch-action: none;
+      }
+      /* Приём ios-haptics / project-fathom: контрол лежит поверх кнопки и сам ловит тап.
+         Скрывать только opacity — у display/visibility:hidden тап не проходит. */
+      .overlay {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        clip-path: inset(0 round 10px);
+        touch-action: manipulation;
+      }
+      /* Контролы для программных попыток: тап в них попадать не должен */
+      .offscreen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 1px;
+        margin: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+      #env,
+      #log {
+        margin-top: 16px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #f2f3f5;
+        color: #000;
+        font:
+          12px/1.5 ui-monospace,
+          monospace;
+        white-space: pre-wrap;
+      }
+      #log {
+        min-height: 80px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Хаптик на iOS — стенд №2</h1>
+    <p class="hint">
+      Прошлый стенд (2026-07-31) проверял программный <code>input.click()</code>, тогда как у всех
+      библиотек рабочей формой был <b>клик по связанному <code>&lt;label&gt;</code></b
+      >. Плюс Apple закрыла программный путь в iOS 26.5 — надо понять, что именно закрыто на вашем
+      устройстве. Пройдите пункты и скажите, где телефон реально щёлкнул. Лог фиксирует только то,
+      что код отработал.
+    </p>
+
+    <div id="env"></div>
+
+    <h2>1. Эталон: жив ли механизм вообще</h2>
+
+    <div class="case">
+      <b>1.1 Видимый switch — переключаю пальцем</b>
+      <input class="sw" type="checkbox" id="visible" />
+      <label class="note" for="visible">
+        если хаптика нет даже здесь — на устройстве механизм недоступен, остальные пункты не имеют
+        смысла
+      </label>
+    </div>
+
+    <div class="case">
+      <b>1.2 Невидимый оверлей поверх кнопки — тап попадает в него</b>
+      <div class="tap">
+        Тап (приём ios-haptics / project-fathom)
+        <input class="sw overlay" type="checkbox" tabindex="-1" aria-hidden="true" data-ov="1" />
+      </div>
+      <label class="note">
+        именно это, по источникам, переживает патч 26.5 — кандидат на «хаптик при тапе по виджетам»
+      </label>
+    </div>
+
+    <h2>2. Программный триггер: формы, которые не проверялись</h2>
+    <p class="hint">
+      Все вызовы — внутри обработчика реального тапа, то есть активация пользователя ещё «свежая».
+    </p>
+
+    <div class="case">
+      <b>2.1 label.click() — label с for=, switch рядом</b>
+      <button type="button" data-act="label-for">Тап → label.click()</button>
+      <input class="sw offscreen" type="checkbox" id="sw-for" tabindex="-1" aria-hidden="true" />
+      <label class="note" id="lbl-for" for="sw-for" aria-hidden="true"></label>
+      <label class="note">главная форма из use-haptic — её и патчили</label>
+    </div>
+
+    <div class="case">
+      <b>2.2 label.click() — switch внутри label (неявная связь)</b>
+      <button type="button" data-act="label-wrap">Тап → label.click()</button>
+      <label class="note" id="lbl-wrap" aria-hidden="true">
+        <input class="sw offscreen" type="checkbox" tabindex="-1" aria-hidden="true" />
+      </label>
+      <label class="note">другая форма связи — патч мог закрыть только одну</label>
+    </div>
+
+    <div class="case">
+      <b>2.3 input.click() — контроль (в прошлый раз не сработало)</b>
+      <button type="button" data-act="input-click">Тап → input.click()</button>
+      <input class="sw offscreen" type="checkbox" tabindex="-1" aria-hidden="true" />
+    </div>
+
+    <div class="case">
+      <b>2.4 checked = !checked + событие change</b>
+      <button type="button" data-act="checked">Тап → смена checked без клика</button>
+      <input class="sw offscreen" type="checkbox" tabindex="-1" aria-hidden="true" />
+    </div>
+
+    <div class="case">
+      <b>2.5 label.click() по видимому switch (не спрятанному)</b>
+      <button type="button" data-act="label-visible">Тап → label.click()</button>
+      <input class="sw" type="checkbox" id="sw-vis" tabindex="-1" />
+      <label class="note" id="lbl-vis" for="sw-vis">кликаем программно вот по этой подписи</label>
+      <label class="note">проверка гипотезы «патч бьёт по скрытым/нулевым контролам»</label>
+    </div>
+
+    <h2>3. Асинхронные моменты — то, что нужно прототипу</h2>
+    <p class="hint">
+      Если хоть один пункт даст хаптик, на iOS становятся достижимы «шторка доехала» и «середина
+      раскрытия».
+    </p>
+
+    <div class="case">
+      <b>3.1 label.click() через 250 мс после тапа</b>
+      <button type="button" data-act="timer">Тап → setTimeout 250 мс</button>
+      <input class="sw offscreen" type="checkbox" id="sw-timer" tabindex="-1" aria-hidden="true" />
+      <label class="note" id="lbl-timer" for="sw-timer" aria-hidden="true"></label>
+    </div>
+
+    <div class="case">
+      <b>3.2 label.click() из transitionend (300 мс)</b>
+      <button type="button" data-act="transition">Тап → переход → label.click()</button>
+      <div class="mover"></div>
+      <input class="sw offscreen" type="checkbox" id="sw-tr" tabindex="-1" aria-hidden="true" />
+      <label class="note" id="lbl-tr" for="sw-tr" aria-hidden="true"></label>
+    </div>
+
+    <div class="case">
+      <b>3.3 label.click() из touchmove — палец на экране</b>
+      <div class="swipe" data-act="move-label">Проведите пальцем вниз на 30+ px</div>
+      <input class="sw offscreen" type="checkbox" id="sw-move" tabindex="-1" aria-hidden="true" />
+      <label class="note" id="lbl-move" for="sw-move" aria-hidden="true"></label>
+      <label class="note">
+        активация «горячая» — палец не отпущен; проверяем, не осталась ли лазейка
+      </label>
+    </div>
+
+    <div class="case">
+      <b>3.4 Палец лежит на самом switch-оверлее, click() зовём из touchmove</b>
+      <div class="swipe" data-act="move-over">
+        Ведите пальцем прямо по этой области
+        <input class="sw overlay" type="checkbox" tabindex="-1" aria-hidden="true" data-ov="2" />
+      </div>
+      <label class="note">
+        гибрид: палец физически на контроле, но переключаем программно — последняя гипотеза для
+        жеста
+      </label>
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+      // Атрибут switch (iOS 17.4+) ставим из JS — как в прошлом стенде
+      document.querySelectorAll('.sw').forEach((el) => el.setAttribute('switch', ''));
+
+      const logEl = document.getElementById('log');
+      const lines = [];
+      const log = (s) => {
+        lines.push(s);
+        logEl.textContent = lines.slice(-16).join('\n');
+      };
+
+      const wk = window.webkit && window.webkit.messageHandlers;
+      document.getElementById('env').textContent = [
+        'UA: ' + navigator.userAgent,
+        'switch поддерживается: ' + ('switch' in document.createElement('input')),
+        'vibrate: ' + (typeof navigator.vibrate === 'function' ? 'есть' : 'нет'),
+        'standalone (с домашнего экрана): ' + (navigator.standalone === true),
+        'мост хоста: ' +
+          ([
+            wk ? 'webkit.messageHandlers' : '',
+            window.Telegram ? 'Telegram' : '',
+            window.vkBridge || window.AndroidBridge ? 'VK' : '',
+          ]
+            .filter(Boolean)
+            .join(', ') || 'нет (обычный Safari)'),
+      ].join('\n');
+
+      const state = (el) => (el.checked ? 'on' : 'off');
+
+      // 1.1 / 1.2 — реальные касания
+      document.getElementById('visible').addEventListener('change', (e) => {
+        log('1.1 видимый switch → ' + state(e.target));
+      });
+      document.querySelectorAll('[data-ov]').forEach((el) => {
+        el.addEventListener('change', () => log('оверлей ' + el.dataset.ov + ' → ' + state(el)));
+      });
+
+      // 2.x / 3.x — программные попытки
+      document.querySelectorAll('[data-act]').forEach((el) => {
+        const act = el.dataset.act;
+        const caseEl = el.closest('.case');
+        const sw = caseEl.querySelector('input.sw');
+
+        if (act === 'move-label' || act === 'move-over') {
+          let fired = false;
+          let startY = 0;
+          el.addEventListener('touchstart', (e) => {
+            fired = false;
+            startY = e.touches[0].clientY;
+          });
+          el.addEventListener('touchmove', (e) => {
+            if (fired || Math.abs(e.touches[0].clientY - startY) < 30) return;
+            fired = true;
+            if (act === 'move-label') {
+              document.getElementById('lbl-move').click();
+              log('3.3 label.click() из touchmove → ' + state(sw));
+            } else {
+              const ov = caseEl.querySelector('.overlay');
+              ov.click();
+              log('3.4 click() по оверлею под пальцем → ' + state(ov));
+            }
+          });
+          return;
+        }
+
+        el.addEventListener('click', () => {
+          if (act === 'label-for') {
+            document.getElementById('lbl-for').click();
+            log('2.1 label[for].click() → ' + state(sw));
+          } else if (act === 'label-wrap') {
+            document.getElementById('lbl-wrap').click();
+            log('2.2 label-обёртка.click() → ' + state(sw));
+          } else if (act === 'input-click') {
+            sw.click();
+            log('2.3 input.click() → ' + state(sw));
+          } else if (act === 'checked') {
+            sw.checked = !sw.checked;
+            sw.dispatchEvent(new Event('change', { bubbles: true }));
+            log('2.4 checked напрямую → ' + state(sw));
+          } else if (act === 'label-visible') {
+            document.getElementById('lbl-vis').click();
+            log('2.5 label.click() по видимому switch → ' + state(sw));
+          } else if (act === 'timer') {
+            setTimeout(() => {
+              document.getElementById('lbl-timer').click();
+              log('3.1 label.click() через 250 мс → ' + state(sw));
+            }, 250);
+          } else if (act === 'transition') {
+            const mover = caseEl.querySelector('.mover');
+            mover.addEventListener(
+              'transitionend',
+              () => {
+                document.getElementById('lbl-tr').click();
+                log('3.2 label.click() из transitionend → ' + state(sw));
+              },
+              { once: true },
+            );
+            mover.style.transform =
+              mover.style.transform === 'translateX(200px)'
+                ? 'translateX(0px)'
+                : 'translateX(200px)';
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
