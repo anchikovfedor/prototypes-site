@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Хаптик на iOS — стенд №3</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font:
+          16px/1.4 -apple-system,
+          system-ui,
+          sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 16px 16px 48px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 28px 0 8px;
+      }
+      p.hint {
+        margin: 0 0 16px;
+        color: #697481;
+        font-size: 14px;
+      }
+      .warn {
+        margin: 0 0 16px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #ffe0e0;
+        color: #8b0000;
+        font-size: 14px;
+      }
+      .case {
+        position: relative;
+        margin-bottom: 10px;
+        padding: 12px 14px;
+        border: 1px solid #d7d8d9;
+        border-radius: 12px;
+      }
+      .case b {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+      .note {
+        display: block;
+        margin-top: 8px;
+        color: #697481;
+        font-size: 13px;
+      }
+      button {
+        width: 100%;
+        min-height: 48px;
+        font: inherit;
+        border: 0;
+        border-radius: 10px;
+        background: #2688eb;
+        color: #fff;
+        touch-action: manipulation;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .swipe {
+        position: relative;
+        height: 88px;
+        border: 1px dashed #99a2ad;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #697481;
+        font-size: 14px;
+        touch-action: none;
+      }
+      .mover {
+        width: 40px;
+        height: 12px;
+        border-radius: 6px;
+        background: #2688eb;
+        transition: transform 300ms ease;
+      }
+      /* Варианты «скрытности» контрола — проверяем, что именно требует WebKit */
+      .v-full {
+        margin: 8px 0 0;
+      }
+      .v-transparent {
+        margin: 8px 0 0;
+        opacity: 0;
+      }
+      .v-almost {
+        margin: 8px 0 0;
+        opacity: 0.02;
+      }
+      .v-tiny {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1px;
+        height: 1px;
+        margin: 0;
+        opacity: 0;
+      }
+      .v-offscreen {
+        position: fixed;
+        top: 0;
+        left: -9999px;
+        margin: 0;
+      }
+      .v-covered {
+        margin: 8px 0 0;
+      }
+      .cover-wrap {
+        position: relative;
+        display: inline-block;
+        margin-top: 8px;
+      }
+      .cover {
+        position: absolute;
+        inset: 0;
+        background: #f2f3f5;
+      }
+      .v-noevents {
+        margin: 8px 0 0;
+        pointer-events: none;
+      }
+      #env,
+      #log {
+        margin-top: 16px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #f2f3f5;
+        color: #000;
+        font:
+          12px/1.5 ui-monospace,
+          monospace;
+        white-space: pre-wrap;
+      }
+      #log {
+        min-height: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Хаптик на iOS — стенд №3</h1>
+    <p class="hint">
+      Коммит WebKit (bug 285120) требует, чтобы в момент клика шла обработка пользовательского
+      жеста: «It should not be possible to generate haptic feedback from script alone». Проверяем
+      две вещи: <b>какой контрол</b> годится (блок A) и <b>из какого момента</b> можно звать
+      программный клик (блок B).
+    </p>
+    <p class="warn">
+      Жмите только синие кнопки. Если палец случайно попадёт в сам switch или подпись — в логе
+      появится «⚠ РЕАЛЬНОЕ КАСАНИЕ», и этот хаптик не считается.
+    </p>
+
+    <div id="env"></div>
+
+    <h2>A. Какой контрол годится</h2>
+    <p class="hint">
+      Все вызовы одинаковы: label.click() синхронно внутри обработчика клика кнопки.
+    </p>
+
+    <div class="case" data-kind="v-full">
+      <b>A1 switch видимый, label с текстом</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note">подпись, по которой программно кликаем</label>
+      <input class="sw v-full" type="checkbox" />
+      <span class="note">повтор пункта 2.5, но теперь видно, был ли это ваш палец</span>
+    </div>
+
+    <div class="case" data-kind="v-transparent">
+      <b>A2 switch opacity: 0, обычный размер, в потоке</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+      <span class="note">главный кандидат для прототипа: невидим, но отрисован</span>
+    </div>
+
+    <div class="case" data-kind="v-almost">
+      <b>A3 switch opacity: 0.02</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note">подпись</label>
+      <input class="sw v-almost" type="checkbox" />
+      <span class="note">запасной вариант, если ровный ноль не проходит</span>
+    </div>
+
+    <div class="case" data-kind="v-covered">
+      <b>A4 switch видимый, но накрыт непрозрачным слоем</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note">подпись</label>
+      <span class="cover-wrap">
+        <input class="sw v-covered" type="checkbox" />
+        <span class="cover"></span>
+      </span>
+      <span class="note">отрисован полностью, но пальцу недоступен</span>
+    </div>
+
+    <div class="case" data-kind="v-tiny">
+      <b>A5 switch 1×1 px, opacity: 0</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note">подпись</label>
+      <input class="sw v-tiny" type="checkbox" />
+      <span class="note">форма из стенда №2 (пункт 2.1) — там молчало</span>
+    </div>
+
+    <div class="case" data-kind="v-offscreen">
+      <b>A6 switch за пределами экрана</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note">подпись</label>
+      <input class="sw v-offscreen" type="checkbox" />
+    </div>
+
+    <div class="case" data-kind="v-noevents">
+      <b>A7 switch видимый, pointer-events: none</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note">подпись</label>
+      <input class="sw v-noevents" type="checkbox" />
+      <span class="note">проверяем, мешает ли снятие событий</span>
+    </div>
+
+    <div class="case" data-kind="v-full-empty">
+      <b>A8 switch видимый, label пустой (нулевой высоты)</b>
+      <button type="button">Тап → label.click()</button>
+      <label class="note" style="margin: 0"></label>
+      <input class="sw v-full" type="checkbox" />
+      <span class="note">вторая гипотеза, почему молчали 2.1 и 2.2</span>
+    </div>
+
+    <h2>B. Из какого момента можно звать</h2>
+    <p class="hint">
+      Форма контрола везде одна — как в A2 (opacity: 0, обычный размер). Это и есть ответ на вопрос,
+      какие моменты прототипа получат хаптик на iOS.
+    </p>
+
+    <div class="case" data-kind="v-transparent" data-when="click">
+      <b>B1 из обработчика click</b>
+      <button type="button">Тап</button>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+    </div>
+
+    <div class="case" data-kind="v-transparent" data-when="touchstart">
+      <b>B2 из touchstart</b>
+      <div class="swipe">Коснитесь</div>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+    </div>
+
+    <div class="case" data-kind="v-transparent" data-when="touchmove">
+      <b>B3 из touchmove — «середина раскрытия виджетов»</b>
+      <div class="swipe">Проведите пальцем вниз на 30+ px</div>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+      <span class="note">ключевой пункт: в прототипе хаптик именно здесь</span>
+    </div>
+
+    <div class="case" data-kind="v-transparent" data-when="touchend">
+      <b>B4 из touchend — «обновление сработало»</b>
+      <div class="swipe">Коснитесь и отпустите</div>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+    </div>
+
+    <div class="case" data-kind="v-transparent" data-when="timeout0">
+      <b>B5 из setTimeout(0) после тапа</b>
+      <button type="button">Тап</button>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+      <span class="note">граница: жест уже обработан, но прошёл лишь тик</span>
+    </div>
+
+    <div class="case" data-kind="v-transparent" data-when="timeout250">
+      <b>B6 из setTimeout(250) — доводка раскрытия</b>
+      <button type="button">Тап</button>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+    </div>
+
+    <div class="case" data-kind="v-transparent" data-when="raf">
+      <b>B7 из requestAnimationFrame</b>
+      <button type="button">Тап</button>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+    </div>
+
+    <div class="case" data-kind="v-transparent" data-when="transitionend">
+      <b>B8 из transitionend — «шторка доехала»</b>
+      <button type="button">Тап → переход 300 мс</button>
+      <div class="mover"></div>
+      <label class="note">подпись</label>
+      <input class="sw v-transparent" type="checkbox" />
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+      document.querySelectorAll('.sw').forEach((el) => el.setAttribute('switch', ''));
+
+      /* Связь label ↔ switch задаём из скрипта: у каждого блока свой id, иначе
+         label.click() не дойдёт до контрола. */
+      document.querySelectorAll('.case').forEach((caseEl, i) => {
+        const sw = caseEl.querySelector('input.sw');
+        const label = caseEl.querySelector('label');
+        if (!sw || !label) return;
+        sw.id = 'sw-' + i;
+        label.htmlFor = sw.id;
+      });
+
+      const logEl = document.getElementById('log');
+      const lines = [];
+      const log = (s) => {
+        lines.push(s);
+        logEl.textContent = lines.slice(-18).join('\n');
+      };
+
+      document.getElementById('env').textContent = [
+        'UA: ' + navigator.userAgent,
+        'switch поддерживается: ' + ('switch' in document.createElement('input')),
+        'standalone: ' + (navigator.standalone === true),
+      ].join('\n');
+
+      /* Метка ложного срабатывания: если палец сам попал в контрол или подпись,
+         хаптик придёт от касания, а не от нашего click(). */
+      document.querySelectorAll('.case').forEach((caseEl) => {
+        const title = caseEl.querySelector('b').textContent.slice(0, 2);
+        [caseEl.querySelector('input.sw'), caseEl.querySelector('label')].forEach((el) => {
+          if (!el) return;
+          el.addEventListener('pointerdown', () => log('⚠ РЕАЛЬНОЕ КАСАНИЕ контрола в ' + title));
+        });
+      });
+
+      const fire = (caseEl, tag) => {
+        const label = caseEl.querySelector('label');
+        const sw = caseEl.querySelector('input.sw');
+        label.click();
+        log(tag + ' → switch ' + (sw.checked ? 'on' : 'off'));
+      };
+
+      // Блок A: всегда синхронно из click
+      document.querySelectorAll('.case[data-kind]:not([data-when])').forEach((caseEl) => {
+        const title = caseEl.querySelector('b').textContent.slice(0, 2);
+        caseEl.querySelector('button').addEventListener('click', () => fire(caseEl, title));
+      });
+
+      // Блок B: одна форма контрола, разные моменты вызова
+      document.querySelectorAll('.case[data-when]').forEach((caseEl) => {
+        const when = caseEl.dataset.when;
+        const title = caseEl.querySelector('b').textContent.slice(0, 2);
+        const btn = caseEl.querySelector('button');
+        const swipe = caseEl.querySelector('.swipe');
+
+        if (when === 'touchstart') {
+          swipe.addEventListener('touchstart', () => fire(caseEl, title));
+          return;
+        }
+        if (when === 'touchend') {
+          swipe.addEventListener('touchend', () => fire(caseEl, title));
+          return;
+        }
+        if (when === 'touchmove') {
+          let fired = false;
+          let startY = 0;
+          swipe.addEventListener('touchstart', (e) => {
+            fired = false;
+            startY = e.touches[0].clientY;
+          });
+          swipe.addEventListener('touchmove', (e) => {
+            if (fired || Math.abs(e.touches[0].clientY - startY) < 30) return;
+            fired = true;
+            fire(caseEl, title);
+          });
+          return;
+        }
+
+        btn.addEventListener('click', () => {
+          if (when === 'click') {
+            fire(caseEl, title);
+          } else if (when === 'timeout0') {
+            setTimeout(() => fire(caseEl, title), 0);
+          } else if (when === 'timeout250') {
+            setTimeout(() => fire(caseEl, title), 250);
+          } else if (when === 'raf') {
+            requestAnimationFrame(() => fire(caseEl, title));
+          } else if (when === 'transitionend') {
+            const mover = caseEl.querySelector('.mover');
+            mover.addEventListener('transitionend', () => fire(caseEl, title), { once: true });
+            mover.style.transform =
+              mover.style.transform === 'translateX(200px)'
+                ? 'translateX(0px)'
+                : 'translateX(200px)';
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

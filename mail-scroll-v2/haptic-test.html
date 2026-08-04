@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Хаптик на Android — стенд</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font:
+          16px/1.4 -apple-system,
+          system-ui,
+          sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 16px 16px 48px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 28px 0 8px;
+      }
+      p.hint {
+        margin: 0 0 16px;
+        color: #697481;
+        font-size: 14px;
+      }
+      ol.check {
+        margin: 0 0 16px;
+        padding-left: 20px;
+        color: #697481;
+        font-size: 14px;
+      }
+      ol.check li {
+        margin-bottom: 4px;
+      }
+      .case {
+        position: relative;
+        margin-bottom: 10px;
+        padding: 12px 14px;
+        border: 1px solid #d7d8d9;
+        border-radius: 12px;
+      }
+      .case b {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+      .case label {
+        display: block;
+        margin-top: 8px;
+        color: #697481;
+        font-size: 13px;
+      }
+      button {
+        width: 100%;
+        min-height: 48px;
+        font: inherit;
+        border: 0;
+        border-radius: 10px;
+        background: #2688eb;
+        color: #fff;
+        touch-action: manipulation;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .mover {
+        width: 40px;
+        height: 12px;
+        border-radius: 6px;
+        background: #2688eb;
+        transition: transform 300ms ease;
+      }
+      .swipe {
+        height: 96px;
+        border: 1px dashed #99a2ad;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #697481;
+        font-size: 14px;
+        touch-action: none;
+      }
+      #env,
+      #log {
+        margin-top: 16px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #f2f3f5;
+        color: #000;
+        font:
+          12px/1.5 ui-monospace,
+          monospace;
+        white-space: pre-wrap;
+      }
+      #log {
+        min-height: 80px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Хаптик на Android — стенд</h1>
+    <p class="hint">
+      Цель — понять, почему в прототипе не ощущается <code>navigator.vibrate(10)</code>. Пройдите
+      блоки сверху вниз и скажите, <b>где телефон реально щёлкнул</b>. Лог показывает только то, что
+      вернул вызов: <code>false</code> = браузер отказал, <code>true</code> = вызов принят (но мотор
+      всё ещё может молчать из-за настроек системы).
+    </p>
+
+    <div id="env"></div>
+
+    <h2>0. Гейт активации</h2>
+    <p class="hint">
+      Первый пункт заполняется сам при загрузке — до того, как вы коснулись страницы. Здесь ожидаем
+      отказ: Chrome не даёт вибрировать, пока во фрейме не было касания.
+    </p>
+
+    <div class="case">
+      <b>0.1 vibrate(50) на загрузке страницы</b>
+      <label>результат в логе, строка «autoload»</label>
+    </div>
+
+    <h2>1. Длительность: где начинает ощущаться</h2>
+    <p class="hint">
+      Все вызовы — из обработчика клика, то есть гейт активации гарантированно пройден. Жмите по
+      порядку и запомните первую кнопку, которую чувствуете.
+    </p>
+
+    <div class="case">
+      <b>1.1 Одиночный импульс</b>
+      <div class="row">
+        <button type="button" data-ms="5">5 мс</button>
+        <button type="button" data-ms="10">10 мс ← сейчас в проде</button>
+        <button type="button" data-ms="20">20 мс</button>
+        <button type="button" data-ms="35">35 мс</button>
+        <button type="button" data-ms="50">50 мс</button>
+        <button type="button" data-ms="100">100 мс</button>
+      </div>
+      <label>10 мс — текущее значение в haptic.ts, остальные для сравнения</label>
+    </div>
+
+    <div class="case">
+      <b>1.2 Паттерны (пауза внутри может добавить «щелчок»)</b>
+      <div class="row">
+        <button type="button" data-pattern="10,30,10">10·30·10</button>
+        <button type="button" data-pattern="20,40,20">20·40·20</button>
+        <button type="button" data-pattern="1,1,1,1,1,1,1,1,1,1">«PWM» 10×1</button>
+      </div>
+      <label>третья кнопка — тот самый приём «интенсивности» из библиотек</label>
+    </div>
+
+    <h2>2. Контекст вызова</h2>
+    <p class="hint">
+      Один и тот же импульс (значение берётся из поля ниже) из тех мест, откуда его зовёт прототип.
+      Если ощущается в 2.1, но не в 2.3 — дело в гейте активации, а не в длительности.
+    </p>
+
+    <div class="case">
+      <b>Длительность для блока 2</b>
+      <div class="row">
+        <button type="button" data-set="10">10 мс</button>
+        <button type="button" data-set="35">35 мс</button>
+        <button type="button" data-set="50">50 мс</button>
+      </div>
+      <label id="ctx-ms">сейчас: 35 мс</label>
+    </div>
+
+    <div class="case">
+      <b>2.1 click</b>
+      <button type="button" data-act="click">Тап</button>
+      <label>как «тап по виджетам» (ExpandedWidgets)</label>
+    </div>
+
+    <div class="case">
+      <b>2.2 touchend</b>
+      <div class="swipe" data-act="touchend">Коснитесь и отпустите</div>
+      <label>как отпускание в pull-to-refresh</label>
+    </div>
+
+    <div class="case">
+      <b>2.3 touchmove (середина жеста)</b>
+      <div class="swipe" data-act="touchmove">Проведите пальцем вниз на 30+ px</div>
+      <label>как «середина раскрытия виджетов» — важный пункт: тут вызов идёт до отпускания</label>
+    </div>
+
+    <div class="case">
+      <b>2.4 setTimeout 250 мс</b>
+      <button type="button" data-act="timer">Тап → через 250 мс</button>
+      <label>как доводка раскрытия (MailSheet: setTimeout(haptic, 250))</label>
+    </div>
+
+    <div class="case">
+      <b>2.5 transitionend</b>
+      <button type="button" data-act="transition">Тап → переход 300 мс → хаптик</button>
+      <div class="mover"></div>
+      <label>как «шторка доехала доверху»</label>
+    </div>
+
+    <div class="case">
+      <b>2.6 requestAnimationFrame</b>
+      <button type="button" data-act="raf">Тап → следующий кадр</button>
+    </div>
+
+    <h2>3. Проверить в настройках телефона</h2>
+    <ol class="check">
+      <li>
+        Настройки → Звук и вибрация → Вибрация и хаптик: тактильная отдача при касании включена.
+      </li>
+      <li>Там же — ползунки интенсивности не на минимуме.</li>
+      <li>Телефон не в беззвучном режиме и не в режиме «Не беспокоить».</li>
+      <li>Экономия заряда выключена (она глушит вибрацию).</li>
+      <li>Открыто в обычном Chrome, а не во встроенном браузере мессенджера.</li>
+      <li>
+        Проверка вне веба: клавиатура Gboard даёт отдачу при наборе? Если нет — проблема системная.
+      </li>
+    </ol>
+
+    <div id="log"></div>
+
+    <script>
+      const logEl = document.getElementById('log');
+      const lines = [];
+      const log = (s) => {
+        lines.push(s);
+        logEl.textContent = lines.slice(-16).join('\n');
+      };
+
+      const ua = navigator.userActivation;
+      document.getElementById('env').textContent = [
+        'UA: ' + navigator.userAgent,
+        'vibrate: ' + (typeof navigator.vibrate === 'function' ? 'есть' : 'НЕТ'),
+        'visibilityState: ' + document.visibilityState,
+        'userActivation: ' +
+          (ua ? 'hasBeenActive=' + ua.hasBeenActive + ', isActive=' + ua.isActive : 'нет API'),
+        'в iframe: ' + (window.top !== window.self),
+      ].join('\n');
+
+      /** Единственная точка вызова: всегда логируем то, что вернул браузер. */
+      const buzz = (arg, tag) => {
+        if (typeof navigator.vibrate !== 'function') {
+          log(tag + ': API нет');
+          return;
+        }
+        const ok = navigator.vibrate(arg);
+        const act = navigator.userActivation;
+        log(
+          tag +
+            ': vibrate(' +
+            arg +
+            ') → ' +
+            ok +
+            (act ? ' [hasBeenActive=' + act.hasBeenActive + ']' : ''),
+        );
+      };
+
+      // 0.1 — до любого касания страницы
+      buzz(50, 'autoload');
+
+      // 1.1 / 1.2
+      document.querySelectorAll('[data-ms]').forEach((el) => {
+        el.addEventListener('click', () => buzz(Number(el.dataset.ms), 'одиночный'));
+      });
+      document.querySelectorAll('[data-pattern]').forEach((el) => {
+        el.addEventListener('click', () => {
+          buzz(el.dataset.pattern.split(',').map(Number), 'паттерн');
+        });
+      });
+
+      // Блок 2: общая длительность
+      let ctxMs = 35;
+      const ctxLabel = document.getElementById('ctx-ms');
+      document.querySelectorAll('[data-set]').forEach((el) => {
+        el.addEventListener('click', () => {
+          ctxMs = Number(el.dataset.set);
+          ctxLabel.textContent = 'сейчас: ' + ctxMs + ' мс';
+          log('длительность блока 2 → ' + ctxMs + ' мс');
+        });
+      });
+
+      document.querySelectorAll('[data-act]').forEach((el) => {
+        const act = el.dataset.act;
+
+        if (act === 'touchend') {
+          el.addEventListener('touchend', () => buzz(ctxMs, '2.2 touchend'));
+          return;
+        }
+
+        if (act === 'touchmove') {
+          let fired = false;
+          let startY = 0;
+          el.addEventListener('touchstart', (e) => {
+            fired = false;
+            startY = e.touches[0].clientY;
+          });
+          el.addEventListener('touchmove', (e) => {
+            if (fired || Math.abs(e.touches[0].clientY - startY) < 30) return;
+            fired = true;
+            buzz(ctxMs, '2.3 touchmove');
+          });
+          return;
+        }
+
+        el.addEventListener('click', () => {
+          if (act === 'click') {
+            buzz(ctxMs, '2.1 click');
+          } else if (act === 'timer') {
+            setTimeout(() => buzz(ctxMs, '2.4 setTimeout'), 250);
+          } else if (act === 'transition') {
+            const mover = el.closest('.case').querySelector('.mover');
+            mover.addEventListener('transitionend', () => buzz(ctxMs, '2.5 transitionend'), {
+              once: true,
+            });
+            mover.style.transform =
+              mover.style.transform === 'translateX(200px)'
+                ? 'translateX(0px)'
+                : 'translateX(200px)';
+          } else if (act === 'raf') {
+            requestAnimationFrame(() => buzz(ctxMs, '2.6 rAF'));
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
