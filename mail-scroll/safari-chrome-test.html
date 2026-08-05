@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Пробник: схлопывание панели Safari</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        overscroll-behavior: none;
+      }
+
+      body {
+        font:
+          15px/1.4 -apple-system,
+          system-ui,
+          sans-serif;
+        color: #10151b;
+        background: #1c85fe;
+      }
+
+      /* Слой «прототипа»: неподвижен во всех режимах, как .proto-mobile в mail-scroll */
+      .app {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        background: linear-gradient(180deg, #1c85fe 0, #80b6f4 240px, #f0f1f3 420px);
+      }
+
+      /* Полосатая линейка: сразу видно, какая часть контента попала под статус-бар */
+      .ruler {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          180deg,
+          rgb(255 255 255 / 55%) 0 2px,
+          transparent 2px 20px
+        );
+        pointer-events: none;
+      }
+
+      /* Карточка у самой верхней кромки — аналог контента, который должен уходить под часы */
+      .card {
+        position: absolute;
+        top: 0;
+        right: 16px;
+        left: 16px;
+        padding: 12px 16px;
+        background: #fff;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 8px 24px rgb(0 0 0 / 8%);
+      }
+
+      .card b {
+        display: block;
+        font-size: 20px;
+      }
+
+      .panel {
+        position: absolute;
+        right: 12px;
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        left: 12px;
+        padding: 12px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+      }
+
+      .modes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      button {
+        padding: 10px 8px;
+        font: inherit;
+        font-size: 13px;
+        color: #10151b;
+        background: #f0f1f3;
+        border: 0;
+        border-radius: 10px;
+      }
+
+      button[aria-pressed='true'] {
+        color: #fff;
+        background: #1c85fe;
+      }
+
+      .nums {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+
+      .hint {
+        margin: 8px 0 0;
+        font-size: 12px;
+        color: #697481;
+      }
+
+      /* Хвост документа: даёт странице прокрутку. Слой .app зафиксирован и в высоту
+         документа не входит, поэтому в режимах 2–3 хвост обязан быть выше вьюпорта. */
+      .tail {
+        display: none;
+        height: 320px;
+      }
+
+      body[data-mode='scrollable'] .tail,
+      body[data-mode='programmatic'] .tail,
+      body[data-mode='native'] .tail {
+        display: block;
+      }
+
+      body[data-mode='scrollable'] .tail,
+      body[data-mode='programmatic'] .tail {
+        height: calc(100dvh + 320px);
+      }
+
+      /* Режим 1 (как в прототипе) и режим 3: жест забираем себе целиком */
+      body[data-mode='fixed'] .app,
+      body[data-mode='programmatic'] .app {
+        touch-action: none;
+      }
+
+      /* Режим 2: вертикальный pan отдаём браузеру — палец скроллит документ */
+      body[data-mode='scrollable'] .app {
+        touch-action: pan-y;
+      }
+
+      /* Режим 4: обычная длинная страница, слой не фиксирован */
+      body[data-mode='native'] .app {
+        position: static;
+        height: 100dvh;
+      }
+    </style>
+  </head>
+  <body data-mode="fixed">
+    <div class="app">
+      <div class="ruler"></div>
+      <div class="card">
+        <b>Контент у кромки</b>
+        Если панель Safari схлопнулась, эта карточка уедет под часы.
+      </div>
+
+      <div class="panel">
+        <div class="modes">
+          <button type="button" data-set="fixed" aria-pressed="true">1. Как прототип</button>
+          <button type="button" data-set="scrollable">2. Отдать pan-y</button>
+          <button type="button" data-set="programmatic">3. scrollBy в жесте</button>
+          <button type="button" data-set="native">4. Обычная страница</button>
+        </div>
+        <div class="nums" id="nums">…</div>
+        <p class="hint">
+          Свайпай по экрану вверх-вниз в каждом режиме. Нужен тот, где safe-top становится &gt; 0 и
+          контент уходит под часы.
+        </p>
+      </div>
+    </div>
+
+    <div class="tail"></div>
+
+    <script>
+      const body = document.body;
+      const nums = document.getElementById('nums');
+      const probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;top:0;height:env(safe-area-inset-top);';
+      document.body.append(probe);
+
+      let maxSafe = 0;
+
+      function render() {
+        const safe = probe.getBoundingClientRect().height;
+        maxSafe = Math.max(maxSafe, safe);
+        const vv = window.visualViewport;
+        nums.textContent = [
+          `режим:      ${body.dataset.mode}`,
+          `safe-top:   ${safe.toFixed(0)} (max за сессию ${maxSafe.toFixed(0)})`,
+          `innerHeight ${window.innerHeight}`,
+          `visualVP    ${vv ? vv.height.toFixed(0) : '—'}`,
+          `scrollY     ${Math.round(window.scrollY)}`,
+          `screen.h    ${window.screen.height}`,
+        ].join('\n');
+      }
+
+      for (const b of document.querySelectorAll('button[data-set]')) {
+        b.addEventListener('click', () => {
+          body.dataset.mode = b.dataset.set;
+          for (const other of document.querySelectorAll('button[data-set]')) {
+            other.setAttribute('aria-pressed', String(other === b));
+          }
+          maxSafe = 0;
+          render();
+        });
+      }
+
+      /* Режим 3: жест наш (touch-action: none), но на каждом движении пальца пробуем
+         прокрутить документ программно — вопрос стенда в том, засчитает ли это Safari
+         за пользовательский скролл и схлопнет ли панель. */
+      let startY = 0;
+      document.addEventListener(
+        'touchstart',
+        (e) => {
+          startY = e.touches[0].clientY;
+        },
+        { passive: true },
+      );
+
+      document.addEventListener(
+        'touchmove',
+        (e) => {
+          if (body.dataset.mode !== 'programmatic') return;
+          const dy = startY - e.touches[0].clientY;
+          window.scrollTo(0, Math.max(0, dy));
+          render();
+        },
+        { passive: true },
+      );
+
+      window.addEventListener('scroll', render, { passive: true });
+      window.addEventListener('resize', render);
+      window.visualViewport?.addEventListener('resize', render);
+      render();
+    </script>
+  </body>
+</html>
