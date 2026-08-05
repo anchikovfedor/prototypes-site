@@ -10,11 +10,12 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <!-- black-translucent, а не default: только так вебвью в standalone занимает и зону
-         статус-бара (env(safe-area-inset-top) начинает отдавать её высоту), и под статус-бар
-         уходит синий фон страницы. Заодно текст статус-бара становится белым. -->
+         статус-бара (env(safe-area-inset-top) начинает отдавать её высоту), и контент уходит
+         под неё. Заодно текст статус-бара становится белым. -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <!-- тулбар Safari и системный хром Android — в синий верх градиента (Bg_Light) -->
-    <meta name="theme-color" content="#1c85fe" />
+    <!-- theme-color намеренно нет (2026-08-05): в standalone iOS красит им зону статус-бара,
+         и поверх контента оставалась синяя полоса — она перебивает black-translucent.
+         Цена: в Safari с тулбарами верхняя полоса браузера теперь дефолтная, а не синяя. -->
     <title>Prototype — mail-scroll</title>
     <script type="module" crossorigin src="/prototypes-site/mail-scroll/assets/index-D2rU3zND.js"></script>
     <link rel="stylesheet" crossorigin href="/prototypes-site/mail-scroll/assets/index-DMiHjilB.css">
