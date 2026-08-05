@@ -2,7 +2,10 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover обязателен: без него iOS вписывает вебвью в safe area — контент
+         не уходит под статус-бар, env(safe-area-inset-*) отдаёт 0, а зону статус-бара
+         заливает фон окна (проверено на устройстве 2026-08-05). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <!-- standalone-режим с домашнего экрана: прототип открывается без хрома браузера -->
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" type="image/png" href="icon-192.png" />
