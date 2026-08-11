@@ -1,0 +1,36 @@
+/* QR открытия прототипа с телефона: всплывает при ховере строки лаунчера.
+   Фон плитки — белый намеренно (контраст для сканирования и в тёмной теме). */
+.qr-badge {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 28px;
+}
+
+.qr-badge__img {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 96px;
+  height: 96px;
+  padding: 6px;
+  box-sizing: content-box;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+  z-index: 2;
+}
+
+.vkuiSimpleCell:hover .qr-badge__img {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qr-badge__img {
+    transition: none;
+  }
+}

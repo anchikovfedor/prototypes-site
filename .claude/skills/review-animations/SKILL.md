@@ -1,7 +1,6 @@
 ---
 name: review-animations
 description: Strict review of animation/motion code against Emil Kowalski's craft bar (animations.dev) plus this repo's rules (value traceability to Figma Motion, the Motion toggle). Default stance — flag; approval is earned. The Block/Approve verdict gates the animation phase.
-disable-model-invocation: true
 license: MIT, Copyright (c) 2026 Matt Pocock
 ---
 
@@ -10,6 +9,18 @@ license: MIT, Copyright (c) 2026 Matt Pocock
 Специализированный ревью-скилл. Делает ОДНУ вещь: ревьюит анимационный/motion-код по
 высокой планке крафта. Не пишет фичи, не чинит посторонние баги, не ревьюит не-motion-код.
 Просят общее код-ревью — откажись и укажи на общий ревью-скилл.
+
+## Исполнение — субагент `proto-animation-review`
+
+Ревью выполняет субагент **`proto-animation-review`** (изоляция контекста + STANDARDS.md).
+Скилл вызывается и пользователем (`/review-animations`), и моделью — на выходе фазы
+`proto-animate`; `disable-model-invocation` снят 2026-08-09 (флаг был унаследован от
+вендоринга upstream, гейт от него не зависел — субагент вызывался напрямую).
+Когда скилл вызван: собери дифф фазы анимации (или возьми явно указанные
+файлы) → делегируй субагенту (Agent tool, `subagent_type: proto-animation-review`) → релей
+его двухчастный отчёт и вердикт Block/Approve → при Approve напомни отметить чекбокс в
+`HANDOFF.md §Статус фаз`. Правила ниже — источник истины, который субагент применяет; здесь
+не дублируются.
 
 **Вход ревью** — дифф фазы анимации (изменения относительно заапрувленной статики) или
 явно указанные файлы. Диффа нет и файлы не названы — спроси, что ревьюить, не выбирай сам.

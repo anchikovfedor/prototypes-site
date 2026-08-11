@@ -37,7 +37,9 @@ description: Handoff phase of the prototype workflow — run the Definition-of-D
 3. **Проверять по контенту, не только по «success»**: HEAD ветки `gh-pages` = наш коммит
    (`gh api repos/anchikovfedor/prototypes-site/commits/gh-pages`) **и** сменился hash
    JS-бандла на `https://anchikovfedor.github.io/prototypes-site/` — CDN несколько минут
-   может отдавать старый бандл.
+   может отдавать старый бандл. Эту проверку по контенту делегируй субагенту
+   **`proto-deploy-verify`** (`subagent_type: proto-deploy-verify`; передай ожидаемый коммит
+   + прод-URL) — он вернёт вердикт live/не-live с пруфами. Пуш (шаг 2) и апрув — в основном треде.
 4. Грабли: абсолютные литералы к public-ассетам в JS (`'/x.png'`) при подпапочном base не
    переписываются Vite — использовать `import.meta.env.BASE_URL`. Первый в жизни деплой
    нового Pages-репо провижинит CDN до ~15–20 мин — прогон **не отменять**.

@@ -44,4 +44,20 @@ export const prototypes: PrototypeEntry[] = [
     target: 'mobile-app',
     status: 'wip',
   },
+  {
+    dir: 'mail-scroll',
+    title: 'Почта — шторка «Входящие»',
+    description:
+      'Новая стартовая: список писем наезжает шторкой на виджеты, грабер с заголовком и таббар зафиксированы',
+    target: 'mobile-app',
+    status: 'ready',
+  },
+  {
+    dir: 'mail-scroll-v2',
+    title: 'Prototype V2',
+    description:
+      'Та же стартовая, но шторку можно закрыть из любой позиции скролла — жестом за грабер или шапку',
+    target: 'mobile-app',
+    status: 'ready',
+  },
 ];

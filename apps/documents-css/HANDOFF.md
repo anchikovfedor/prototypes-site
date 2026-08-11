@@ -1,5 +1,16 @@
 # Handoff — Документы из облака (CSS)
 
+## Статус фаз
+
+Фазы воркфлоу (`memory-bank/conventions.md`); чекбокс — только после реального прохождения гейта.
+
+- [x] Вход зафиксирован (Figma-состояния + Motion-node — см. ниже)
+- [x] Статика всех состояний заапрувлена пользователем — гейт `proto-static`
+- [x] Анимация готова — `proto-animate`
+- [x] Ревью `/review-animations` — вердикт Approve (стаггер «выезда» и мягкий reduced-motion
+      применены; принятые tradeoff'ы: `blur 24px`, не-GPU absolute-морф)
+- [x] Передача выполнена (DoD, деплой) — live на GitHub Pages
+
 ## Что это
 
 Экран «Документы из облака» (VK Облако): 2-колоночная сетка карточек-стопок документов.
@@ -61,16 +72,22 @@ Figma-файл `<figma-file-key>` (задача <internal-ticket>), узлы:
   (нужно для absolute-морфа), согласовано с пользователем.
 - Веер превью — пиксель-перфект (rotate + общий `skewX(-1.17°)`, origin center).
 - Фон `#f6f7f8` (значение макета) на `html`/`body`/`.vkuiPanel__in`/`.vkuiPanelHeader__in` через `!important`.
-- Шрифт заголовков — **VK Sans Display** (`public/fonts` + `src/fonts.css`) + `font-smoothing: antialiased`.
-  Файлы шрифта **не в git** (проприетарный): положи `.ttf` локально в `public/fonts/`, иначе —
-  системный fallback-стек.
+- Шрифт заголовков — **VK Sans Display** (`src/fonts/` + `src/fonts.css` с относительным
+  `url('./fonts/…')` — Vite хеширует ассет и переписывает путь под подпапочный base) +
+  `font-smoothing: antialiased`. Файлы шрифта **не в git** (проприетарный): положи `.ttf`
+  локально в `src/fonts/`, иначе — **молчаливый** системный fallback-стек (в CI-деплое
+  файлы приезжают из base64-секретов, см. `.github/workflows/deploy.yml`).
 - Кнопка «назад» — `Icon24ChevronLeftOutline` в `PanelHeaderButton` (тёмная `#2c2d2e`, 48px).
 
 ## Фото
 
-- **Реальные** ассеты документов из Figma → `public/photos/` (7 шт., png/jpg). Маппинг на документы —
-  `src/data.ts` (`photos: string[]`, под нехватку счётчика повторяются по кругу, `photoFor`).
-- В `.doc-photo` — `<img object-fit: cover>`; серый `#e1e3e6` — плейсхолдер под загрузку.
+- Ячейки документов — **без фото, сознательно** (решение пользователя, подтверждено
+  2026-07-13: не возвращать): `.doc-photo` залит токеном
+  `var(--vkui--color_background_secondary, #f0f2f5)` — реагирует на тёмную тему, для
+  передачи в разработку достаточно морфа геометрии.
+- Реальные ассеты из Figma (`public/photos/`, 7 шт.) и маппинг `photos[]`/`photoFor` в
+  `data.ts` существовали раньше и удалены — при необходимости восстанавливаются из
+  git-истории.
 
 ## Данные (мок)
 
@@ -81,14 +98,13 @@ Figma-файл `<figma-file-key>` (задача <internal-ticket>), узлы:
 
 `src/`: `App.tsx` (PrototypeRoot vkcom/adaptive + dev-тулбар `Agentation`), `screens/DocumentsPanel.tsx`
 (сцена, замер ширины, `openId`), `components/{DocumentStack,AddTile,CrossfadeTitle}.tsx`,
-`layout.ts` (адаптивная геометрия + веер), `data.ts`, `DocumentStacks.css`, `fonts.css`, `agentation.css`.
-Ассеты — `public/photos`, шрифты — `public/fonts`. Лаунчер — `apps/index/src/prototypes.ts`.
+`layout.ts` (адаптивная геометрия + веер), `data.ts` (`id/title/count`), `DocumentStacks.css`,
+`fonts.css`, `agentation.css`. Шрифты — `src/fonts/` (вне git). Лаунчер — `apps/index/src/prototypes.ts`.
 
-## Гейты / TODO
+## Примечания
 
-- Ревью анимаций — прогнать скилл **`review-animations`** (гейт качества motion, вердикт Approve).
-- Второй способ — восстановить `documents-motion` (Framer `layoutId`) из git-истории.
-- Опц.: если «выезд всех фото из стопки» на реальных фото слишком busy — стаггер или лишние проявлять на месте.
+- Альтернативная Framer-версия (`documents-motion`, `layoutId`) удалена из рабочего дерева —
+  при необходимости восстанавливается из git-истории.
 
 ## Как запустить
 

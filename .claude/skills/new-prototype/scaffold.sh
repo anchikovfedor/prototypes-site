@@ -37,10 +37,14 @@ rsync -a --exclude node_modules --exclude dist "$SRC/" "$DST/"
 sed -i '' "s#@proto/app-template#@proto/app-$NAME#" "$DST/package.json"
 sed -i '' "s#target=\"mobile-app\"#target=\"$TARGET\"#" "$DST/src/App.tsx"
 sed -i '' "s#Prototype — Template#Prototype — $NAME#" "$DST/index.html"
+sed -i '' "s#Prototype — Template#Prototype — $NAME#" "$DST/public/manifest.webmanifest"
 sed -i '' "s#<Название прототипа>#$NAME#" "$DST/HANDOFF.md"
 
 # привязать workspace
 ( cd "$REPO" && npm install >/dev/null 2>&1 )
 
+# регистрация в лаунчере (идемпотентно; title/description потом поправить)
+node "$SCRIPT_DIR/register.mjs" "$NAME" "$TARGET"
+
 echo "created apps/$NAME (target=$TARGET)"
-echo "next: register it in apps/index/src/prototypes.ts, then: npm run dev -w apps/$NAME"
+echo "next: fix title/description in apps/index/src/prototypes.ts, then: npm run dev -w apps/$NAME"

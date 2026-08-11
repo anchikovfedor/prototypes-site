@@ -26,6 +26,9 @@ designContext, conventions). Прочитать перед работой. Фа�
 - Node только через **nvm**, не в системном PATH. Перед node-командами:
   `export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"`.
 - Команды с сетью / установкой пакетов — запускать вне песочницы.
+- **npm registry недоступен с рабочей сети** (install новых пакетов таймаутит) — новые
+  зависимости не добавлять, мелкое вендорить (см. `memory-bank/techContext.md` §Среда).
+- Самопроверка окружения: `node scripts/doctor.mjs`. Вход для Codex-агентов — `AGENTS.md`.
 
 ## Команды
 
@@ -38,7 +41,8 @@ npm run typecheck -w apps/<name>  # проверка типов
 ## Конвенции (кратко; полностью — memory-bank/conventions.md)
 
 - Новый прототип — скилл `/new-prototype <имя> <таргет>` (копия `apps/_template` →
-  переименовать → `npm install` → строка в `apps/index/src/prototypes.ts`).
+  переименовать → `npm install` → авторегистрация в `apps/index/src/prototypes.ts`,
+  `title`/`description` поправить руками).
 - Воркфлоу прототипа — жёсткий гейт: вход (Figma-состояния + Motion-node) → **статика** →
   апрув → **анимация** → ревью. Этапные скиллы: `proto-static` / `proto-animate` /
   `proto-handoff`. Motion-стандарты — скилл `emil-design-eng`, ревью анимаций —

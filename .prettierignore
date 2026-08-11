@@ -7,3 +7,6 @@ package-lock.json
 
 # генерируется scripts/generate-paradigm-theme.mjs — не переформатировать вручную
 packages/kit/src/theme/paradigm.css
+
+# вендоренный сторонний код (Nayuki QR, MIT) — сохраняем форматирование апстрима
+apps/index/src/vendor/

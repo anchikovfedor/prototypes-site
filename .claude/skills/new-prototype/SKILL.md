@@ -23,9 +23,9 @@ description: Scaffold a new clickable prototype in this VKUI monorepo — copy a
    bash .claude/skills/new-prototype/scaffold.sh <name> <target>
    ```
 
-2. Зарегистрируй прототип в лаунчере: добавь объект в массив `prototypes` в
-   `apps/index/src/prototypes.ts` (`dir`, `title`, `description`, `target`,
-   `status: 'wip'`). Редактируй через Edit-инструмент, не sed.
+2. Регистрацию в лаунчере скаффолдер делает сам (`register.mjs` дописывает запись в
+   `apps/index/src/prototypes.ts` со `status: 'wip'` и плейсхолдерами). Твоя часть:
+   поправь `title` и `description` на человеческие через Edit-инструмент, не sed.
 
 3. Проверь: `npm run typecheck -w apps/<name>`, затем `npm run dev -w apps/<name>`.
 

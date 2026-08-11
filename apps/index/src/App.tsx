@@ -11,6 +11,8 @@ import {
 } from '@vkontakte/vkui';
 import { Icon28ChevronRightOutline } from '@vkontakte/icons';
 import { prototypes } from './prototypes';
+import { QrBadge } from './QrBadge';
+import './qr.css';
 
 const TARGET_LABEL: Record<string, string> = {
   'desktop-web': 'Десктоп-веб',
@@ -34,6 +36,7 @@ export function App() {
                 subtitle={`${TARGET_LABEL[p.target]} · ${p.description}`}
                 after={
                   <>
+                    <QrBadge path={`${import.meta.env.BASE_URL}${p.dir}/`} />
                     {p.status === 'wip' ? <Badge mode="prominent" /> : null}
                     <Icon28ChevronRightOutline />
                   </>
@@ -46,7 +49,8 @@ export function App() {
           <Group>
             <Footnote style={{ padding: '12px 16px', color: 'var(--vkui--color_text_secondary)' }}>
               Локально каждый прототип запускается отдельно:
-              {' npm run dev -w apps/<dir>'}. Ссылки выше работают при совместном деплое.
+              {' npm run dev -w apps/<dir>'}. Ссылки выше работают при совместном деплое. Наведи
+              курсор на строку — появится QR, чтобы открыть прототип с телефона.
             </Footnote>
           </Group>
         </Panel>
