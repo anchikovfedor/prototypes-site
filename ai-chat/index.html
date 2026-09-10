@@ -2,7 +2,12 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Прототип показывают на iPhone как приложение: maximum-scale гасит автозум
+         Safari при фокусе в поле (шрифт поля 15px < 16px, иначе зумит) -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <!-- standalone-режим с домашнего экрана: прототип открывается без хрома браузера -->
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" type="image/png" href="icon-192.png" />
@@ -11,8 +16,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Prototype — ai-chat</title>
-    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-CpAQq0_6.js"></script>
-    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-CN_K4zW7.css">
+    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-BsjOCQHY.js"></script>
+    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-DfeD2CSp.css">
   </head>
   <body>
     <div id="root"></div>
