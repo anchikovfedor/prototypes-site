@@ -20,8 +20,12 @@
          непрозрачная полоса фона). Цвет часов при этом задаёт сама iOS — проверить
          на устройстве, что они читаются на белом списке писем. -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Полоса под статус-баром: в Safari 15…18.6 и в standalone её красит этот тег, в
+         Safari 26 он игнорируется и берётся фон html/body (WebKit bug 301756). Оба входа
+         ведёт statusBarTint.ts — здесь стартовое значение, фон экрана списка. -->
+    <meta name="theme-color" content="#ffffff" />
     <title>Prototype — ai-chat</title>
-    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-uqzf1iVW.js"></script>
+    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-BPIw9v4-.js"></script>
     <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-XUJlCFk3.css">
   </head>
   <body>
