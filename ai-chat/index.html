@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <!-- Прототип показывают на iPhone как приложение: maximum-scale гасит автозум
-         Safari при фокусе в поле (шрифт поля 15px < 16px, иначе зумит) -->
+         Safari при фокусе в поле (шрифт поля 15px < 16px, иначе зумит).
+         viewport-fit=cover обязателен: без него страница живёт внутри safe-area,
+         полоса статус-бара красится фоном, а env(safe-area-inset-*) возвращает 0. -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <!-- standalone-режим с домашнего экрана: прототип открывается без хрома браузера -->
     <link rel="manifest" href="manifest.webmanifest" />
@@ -14,10 +16,13 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- black-translucent уводит контент под статус-бар в standalone (иначе там
+         непрозрачная полоса фона). Цвет часов при этом задаёт сама iOS — проверить
+         на устройстве, что они читаются на белом списке писем. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Prototype — ai-chat</title>
-    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-D2tXYOCA.js"></script>
-    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-BKerxKj-.css">
+    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-DTjNAkyB.js"></script>
+    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-C-nf4pW_.css">
   </head>
   <body>
     <div id="root"></div>
