@@ -1,6 +1,6 @@
 {
   "name": "Prototype — Template",
-  "short_name": "Prototype",
+  "short_name": "Mail Template",
   "display": "standalone",
   "start_url": ".",
   "background_color": "#ffffff",
