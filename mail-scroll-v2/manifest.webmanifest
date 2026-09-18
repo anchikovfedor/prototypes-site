@@ -1,6 +1,6 @@
 {
   "name": "Prototype V2",
-  "short_name": "Mail scroll v2",
+  "short_name": "Mail Scroll v2",
   "display": "standalone",
   "start_url": ".",
   "background_color": "#1c85fe",

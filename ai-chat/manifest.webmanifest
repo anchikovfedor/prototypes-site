@@ -1,6 +1,6 @@
 {
   "name": "Prototype — ai-chat",
-  "short_name": "Mail ai-chat",
+  "short_name": "Mail Chat",
   "display": "standalone",
   "start_url": ".",
   "background_color": "#ffffff",
