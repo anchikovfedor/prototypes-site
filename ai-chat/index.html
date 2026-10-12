@@ -5,10 +5,13 @@
     <!-- Прототип показывают на iPhone как приложение: maximum-scale гасит автозум
          Safari при фокусе в поле (шрифт поля 15px < 16px, иначе зумит).
          viewport-fit=cover обязателен: без него страница живёт внутри safe-area,
-         полоса статус-бара красится фоном, а env(safe-area-inset-*) возвращает 0. -->
+         полоса статус-бара красится фоном, а env(safe-area-inset-*) возвращает 0.
+         interactive-widget=resizes-content: где браузер это понимает, layout viewport
+         сам ужимается под клавиатуру и сдвигать страницу к полю ему незачем (так у
+         alice.yandex.ru); Safari без поддержки флаг игнорирует. -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
     />
     <!-- standalone-режим с домашнего экрана: прототип открывается без хрома браузера -->
     <link rel="manifest" href="manifest.webmanifest" />
@@ -32,8 +35,8 @@
          ведёт statusBarTint.ts — здесь стартовое значение, фон экрана списка. -->
     <meta name="theme-color" content="#ffffff" />
     <title>Prototype — ai-chat</title>
-    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-gd83eEOd.js"></script>
-    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-DSQhVnBH.css">
+    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-Cxcxi9vi.js"></script>
+    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-Dq1a2Scy.css">
   </head>
   <body>
     <div id="root"></div>
