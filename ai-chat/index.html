@@ -30,15 +30,35 @@
          статус-баром и занимает экран до низа, а `env(safe-area-inset-top)` отдаёт 0 —
          наши сдвиги на `--safe-top` обнуляются сами. -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <!-- Полоса под статус-баром: в Safari 15…18.6 и в standalone её красит этот тег, в
-         Safari 26 он игнорируется и берётся фон html/body (WebKit bug 301756). Два тега
-         с media — под системную тему; цвета = color_background светлой/тёмной Paradigm
-         (paradigm.css), те же, что в --chat-page-bg. -->
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#19191a" media="(prefers-color-scheme: dark)" />
+    <!-- Системная тема — схема alice.yandex.ru (inline-skin-handler.js, разбор 2026-10-18):
+         скрипт до CSS и бандла вешает класс is-dark на <html> (от него --chat-page-bg и
+         color-scheme в AiChat.css) и императивно меняет content у мет color-scheme и
+         theme-color; то же по событию change медиазапроса. Декларативный вариант
+         (@media в CSS + меты с media) Safari 26 перекрашивал только после перезагрузки:
+         панели браузера он красит фоном html/body (theme-color игнорирует, WebKit bug
+         301756) и пересчитывает их по мутации DOM, а не по смене медиазапроса.
+         Цвета = color_background светлой/тёмной Paradigm (paradigm.css). -->
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+      (function () {
+        var mq = window.matchMedia('(prefers-color-scheme: dark)');
+        var scheme = document.querySelector('meta[name="color-scheme"]');
+        var theme = document.querySelector('meta[name="theme-color"]');
+        function apply(dark) {
+          document.documentElement.classList.toggle('is-dark', dark);
+          scheme.setAttribute('content', dark ? 'dark' : 'light');
+          theme.setAttribute('content', dark ? '#19191a' : '#ffffff');
+        }
+        apply(mq.matches);
+        mq.addEventListener('change', function (e) {
+          apply(e.matches);
+        });
+      })();
+    </script>
     <title>Prototype — ai-chat</title>
-    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-BQVAViVb.js"></script>
-    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-C1xcNQYJ.css">
+    <script type="module" crossorigin src="/prototypes-site/ai-chat/assets/index-CwbUmlKs.js"></script>
+    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat/assets/index-0RGa9y2y.css">
   </head>
   <body>
     <div id="root"></div>
