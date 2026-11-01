@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Прототип показывают на iPhone как приложение: maximum-scale гасит автозум
+         Safari при фокусе в поле (шрифт поля 15px < 16px, иначе зумит).
+         viewport-fit=cover обязателен: без него страница живёт внутри safe-area,
+         полоса статус-бара красится фоном, а env(safe-area-inset-*) возвращает 0.
+         interactive-widget=resizes-content: где браузер это понимает, layout viewport
+         сам ужимается под клавиатуру и сдвигать страницу к полю ему незачем (так у
+         alice.yandex.ru); Safari без поддержки флаг игнорирует. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <!-- standalone-режим с домашнего экрана: прототип открывается без хрома браузера -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- black-translucent уводит контент под статус-бар в standalone (иначе там
+         непрозрачная полоса фона). Цвет часов при этом задаёт сама iOS — проверить
+         на устройстве, что они читаются на белом списке писем. -->
+    <!-- `default`, а не `black-translucent`: с translucent вебвью в standalone начинается
+         от верха экрана, но высоту получает укороченную на статус-бар — замер на
+         устройстве 2026-09-15 дал вьюпорт 793 при экране 852, и низ экрана оставался
+         не покрыт (таббар и поле ввода висели выше низа до первого скролла, после
+         которого iOS пересчитывает вьюпорт). С `default` вебвью начинается под
+         статус-баром и занимает экран до низа, а `env(safe-area-inset-top)` отдаёт 0 —
+         наши сдвиги на `--safe-top` обнуляются сами. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <!-- Системная тема — схема alice.yandex.ru (inline-skin-handler.js, разбор 2026-10-18):
+         скрипт до CSS и бандла вешает класс is-dark на <html> (от него --chat-page-bg и
+         color-scheme в AiChat.css) и императивно меняет content у мет color-scheme и
+         theme-color; то же по событию change медиазапроса. Декларативный вариант
+         (@media в CSS + меты с media) Safari 26 перекрашивал только после перезагрузки:
+         панели браузера он красит фоном html/body (theme-color игнорирует, WebKit bug
+         301756) и пересчитывает их по мутации DOM, а не по смене медиазапроса.
+         Цвета = color_background светлой/тёмной Paradigm (paradigm.css). -->
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
+    <script>
+      (function () {
+        var mq = window.matchMedia('(prefers-color-scheme: dark)');
+        var scheme = document.querySelector('meta[name="color-scheme"]');
+        var theme = document.querySelector('meta[name="theme-color"]');
+        function apply(dark) {
+          document.documentElement.classList.toggle('is-dark', dark);
+          scheme.setAttribute('content', dark ? 'dark' : 'light');
+          theme.setAttribute('content', dark ? '#19191a' : '#ffffff');
+        }
+        apply(mq.matches);
+        mq.addEventListener('change', function (e) {
+          apply(e.matches);
+        });
+      })();
+    </script>
+    <title>Prototype — ai-chat-en</title>
+    <script type="module" crossorigin src="/prototypes-site/ai-chat-en/assets/index-BXOQtFpo.js"></script>
+    <link rel="stylesheet" crossorigin href="/prototypes-site/ai-chat-en/assets/index-CII7f8Sq.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
